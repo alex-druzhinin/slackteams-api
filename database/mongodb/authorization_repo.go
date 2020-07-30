@@ -96,7 +96,15 @@ func (r *slackBotAuthorizationsRepository) findMany(ctx context.Context, filter 
 
 	collection := r.db.Collection(authsCollectionName)
 
-	cur, err := collection.Find(ctx, filter)
+	findOptions := options.Find()
+
+	projection := bson.D{
+		{"scope", 0},
+	}
+
+	findOptions.SetProjection(projection)
+
+	cur, err := collection.Find(ctx, filter, findOptions)
 	defer func() {
 		if err := cur.Close(ctx); err != nil {
 			log.WithError(err).Error("Failed to close cursor in findMany")
