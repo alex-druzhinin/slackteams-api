@@ -73,7 +73,7 @@ func main() {
 
 	var (
 		readHeaderTimeout = 1 * time.Second
-		writeTimeout      = 30 * time.Second
+		writeTimeout      = 120 * time.Second
 		idleTimeout       = 90 * time.Second
 		maxHeaderBytes    = http.DefaultMaxHeaderBytes
 	)
