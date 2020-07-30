@@ -6,13 +6,18 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func respond(w http.ResponseWriter, body []byte, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
-	_, _ = w.Write(body)
+	_, err := w.Write(body)
+	if err != nil {
+		log.WithError(err).Debug("Write in respond failed")
+	}
 }
 
 func isSupported(method string) bool {
