@@ -32,8 +32,8 @@ type AllAuthorizations struct {
 }
 
 type result struct {
-	OK  bool                     `json:"ok"`
-	Res []*SlackBotAuthorization `json:"res"`
+	OK    bool                     `json:"ok"`
+	Auths []*SlackBotAuthorization `json:"auths"`
 }
 
 func (h AllAuthorizations) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -60,8 +60,8 @@ func (h AllAuthorizations) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := result{
-		OK:  true,
-		Res: removeDuplicates(auths),
+		OK:    true,
+		Auths: removeDuplicates(auths),
 	}
 
 	resp, err := json.Marshal(res)
