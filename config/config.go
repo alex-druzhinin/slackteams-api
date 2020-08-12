@@ -7,7 +7,7 @@ import (
 )
 
 func LoadConfig() (config Config, err error) {
-	goconfig.PrefixEnv = "st-api"
+	goconfig.PrefixEnv = "ST_API"
 
 	if err := goconfig.Parse(&config); err != nil {
 		return config, err
@@ -30,7 +30,7 @@ func validateEnv(config Config) error {
 
 type Config struct {
 	Env        EnvType       `cfgRequired:"true"`
-	Addr       string        `cfgRequired:"true"`
+	Addr       string        `cfgDefault:":7010"`
 	MongoDB    MongoDBConfig `cfgRequired:"true"`
 	Amqp       AmqpConfig
 	BotUser    User `cfgRequired:"true"`

@@ -38,6 +38,6 @@ type request struct {
 type AuthRole string
 
 const (
-	RoleExpert   AuthRole = "standuply-bot"
-	RoleCustomer AuthRole = "meteor"
+	RoleBot    AuthRole = "standuply-bot"
+	RoleMeteor AuthRole = "meteor"
 )

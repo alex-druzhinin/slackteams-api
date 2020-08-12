@@ -9,19 +9,19 @@ import (
 )
 
 type BotInfo struct {
-	BotUserId      string
-	BotAccessToken string
+	BotUserId      string `json:"botUserId"`
+	BotAccessToken string `json:"botAccessToken"`
 }
 
 type SlackBotAuthorization struct {
-	AccessToken string
-	Scope       string
-	UserId      string
-	TeamName    string
-	TeamId      string
-	CreatedAt   string
-	Enabled     bool
-	Bot         BotInfo
+	AccessToken string  `json:"accessToken"`
+	Scope       string  `json:"scope"`
+	UserId      string  `json:"userId"`
+	TeamName    string  `json:"teamName"`
+	TeamId      string  `json:"teamId"`
+	CreatedAt   string  `json:"createdAt"`
+	Enabled     bool    `json:"enabled"`
+	Bot         BotInfo `json:"bot"`
 
 	// These fields are not used in bot
 	// cloned *string
@@ -91,6 +91,7 @@ func removeDuplicates(elements []*SlackBotAuthorization) []*SlackBotAuthorizatio
 			i++
 		}
 	}
+
 	// Return the new slice.
-	return result
+	return result[:i]
 }

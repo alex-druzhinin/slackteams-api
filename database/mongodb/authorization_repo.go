@@ -91,6 +91,37 @@ func (r *slackBotAuthorizationsRepository) GetAllAuthorizations(ctx context.Cont
 	return res, nil
 }
 
+func (r *slackBotAuthorizationsRepository) GetAuthorization(ctx context.Context, teamId string) (*handler.SlackBotAuthorization, error) {
+	filter := bson.D{{"enabled", true}, {"teamId", teamId}}
+
+	doc, err := r.findOne(ctx, filter)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, handler.ErrNotFound
+		}
+		
+		log.WithContext(ctx).WithError(err).Debug()
+		return nil, err
+	}
+
+	res := &handler.SlackBotAuthorization{
+		AccessToken: doc.AccessToken,
+		Scope:       doc.Scope,
+		UserId:      doc.UserId,
+		TeamName:    doc.TeamName,
+		TeamId:      doc.TeamId,
+		CreatedAt:   doc.CreatedAt.Format(time.RFC3339),
+		Enabled:     doc.Enabled,
+		Bot: handler.BotInfo{
+			BotUserId:      doc.Bot.BotUserId,
+			BotAccessToken: doc.Bot.BotAccessToken,
+		},
+	}
+	
+
+	return res, nil
+}
+
 func (r *slackBotAuthorizationsRepository) findMany(ctx context.Context, filter interface{}) ([]*slackBotAuthorization, error) {
 	var docs []*slackBotAuthorization
 
@@ -126,4 +157,28 @@ func (r *slackBotAuthorizationsRepository) findMany(ctx context.Context, filter 
 	log.WithContext(ctx).Debugf("findMany: %+v\n", docs[0])
 
 	return docs, nil
+}
+
+func (r *slackBotAuthorizationsRepository) findOne(ctx context.Context, filter interface{}) (*slackBotAuthorization, error) {
+	var doc *slackBotAuthorization
+
+	collection := r.db.Collection(authsCollectionName)
+
+	findOptions := options.FindOne()
+
+	projection := bson.D{
+		{"scope", 0},
+	}
+
+	findOptions.SetProjection(projection)
+
+	err := collection.FindOne(ctx, filter, findOptions).Decode(&doc)
+	if err != nil {
+		log.WithContext(ctx).WithError(err).Debug()
+		return nil, err
+	}
+
+	log.WithContext(ctx).Debugf("findOne: %+v\n", doc)
+
+	return doc, nil
 }
