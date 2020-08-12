@@ -9,7 +9,7 @@ server: $(info $(M) Starting development server...)
 	env `cat ./env/.env | xargs` go run .
 
 lint: $(info $(M) Running long lint from revision...)
-	golangci-lint run --new-from-rev=ff1883d927ce4cd1e06242735efe613f3d919817
+	golangci-lint run
 
 test: $(info $(M) Running all tests)
 	go test ./...

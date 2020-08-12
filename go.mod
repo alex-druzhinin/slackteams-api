@@ -14,7 +14,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/rafaeljesus/retry-go v0.0.0-20171214204623-5981a380a879 // indirect
-	github.com/sirupsen/logrus v1.4.2
+	github.com/sirupsen/logrus v1.6.0
 	github.com/sony/gobreaker v0.4.1 // indirect
 	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

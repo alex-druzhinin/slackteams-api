@@ -7,8 +7,10 @@ import (
 	"os/signal"
 	"time"
 
+	"bitbucket.org/iwlab-standuply/slackteams-api/amqp"
 	"bitbucket.org/iwlab-standuply/slackteams-api/database"
 	"bitbucket.org/iwlab-standuply/slackteams-api/database/mongodb"
+	"bitbucket.org/iwlab-standuply/slackteams-api/rpc"
 
 	"bitbucket.org/iwlab-standuply/slackteams-api/auth"
 	"bitbucket.org/iwlab-standuply/slackteams-api/config"
@@ -44,6 +46,19 @@ func main() {
 		log.WithError(err).Fatal(`Failed to load config`)
 	}
 
+	// Run AMQP RPC server
+
+	amqpClient := amqp.NewClient(conf.Amqp.URI)
+	teamsRepo := mongodb.NewSlackTeamsRepository(conf.MongoDB.URI)
+
+	rpcServer := rpc.NewTeamsRPCServer(amqpClient, teamsRepo)
+
+	if err := rpcServer.Run(); err != nil {
+		log.WithError(err).Fatal("Failed to start RpcServer")
+	}
+
+	// Run HTTP server
+
 	authService, err := auth.NewAuthService(auth.Config{
 		UserRepository: database.NewLocalAuthRepository([]config.User{
 			conf.BotUser,
@@ -55,12 +70,14 @@ func main() {
 		log.WithError(err).Fatal(`Failed to init AuthService`)
 	}
 
+	authRepo := mongodb.NewSlackBotAuthorizationsRepository(conf.MongoDB.URI)
+
 	// Register handlers to routes.
 	mux := http.NewServeMux()
 	mux.Handle("/", handler.Empty{})
 
 	h := handler.AllAuthorizations{
-		Repo: mongodb.NewSlackBotAuthorizationsRepository(conf.MongoDB.URI),
+		Repo: authRepo,
 	}
 	hndlr := handler.LoadContextMiddleware()(
 		auth.LoadContextMiddleware(authService)(
@@ -70,6 +87,18 @@ func main() {
 
 	mux.Handle("/allAuthorizations/", hndlr)
 	mux.Handle("/allAuthorizations", hndlr) // Register without a trailing slash to avoid redirect.
+
+	hOne := handler.GetAuthorization{
+		Repo: authRepo,
+	}
+	hndlrOne := handler.LoadContextMiddleware()(
+		auth.LoadContextMiddleware(authService)(
+			CorsMiddleware(hOne),
+		),
+	)
+
+	mux.Handle("/getAuthorization/", hndlrOne)
+	mux.Handle("/getAuthorization", hndlrOne) // Register without a trailing slash to avoid redirect.
 
 	var (
 		readHeaderTimeout = 1 * time.Second
